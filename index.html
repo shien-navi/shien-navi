@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>須磨区地域資源ナビ - GitHub Pages版</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:1000px;margin:0 auto;padding:16px;background:#FAF7F2}
+header{background:#fff;padding:20px;border-radius:12px;margin-bottom:16px}
+nav a{padding:8px 14px;background:#eee;border-radius:20px;text-decoration:none;color:#333;margin:2px;display:inline-block;font-size:13px}
+nav a.active{background:#2D5BFF;color:#fff}
+.card{background:#fff;padding:12px;border-radius:12px;margin:8px 0;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.tag{background:#E8F0FF;padding:2px 6px;border-radius:10px;font-size:11px;margin:2px;display:inline-block}
+input{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box}
+</style>
+</head>
+<body>
+<header>
+<h1>須磨区自立支援協議会 地域資源ナビ</h1>
+<p style="color:#666;font-size:13px">GitHub Pages統合版：検索 + 行政向け分析</p>
+<nav>
+<a href="index.html" class="active">🏠 検索トップ</a>
+<a href="admin.html">📊 行政向け分析</a>
+<a href="v5.html">🧮 数理モデル版</a>
+<a href="final.html">🔗 統合版（タブ切替）</a>
+</nav>
+<input id="q" placeholder="例: プログラミング, ST, 板宿">
+<div id="count" style="font-size:13px;color:#666;margin-top:8px"></div>
+</header>
+<div id="results"></div>
+<script>
+let data=[];
+fetch('facilities.json').then(r=>r.json()).then(j=>{data=j; render();}).catch(e=>{document.getElementById('count').textContent='facilities.json読込エラー: '+e});
+function render(){
+ const kw=(document.getElementById('q').value||'').toLowerCase();
+ let filtered=data.filter(f=>{
+   if(!kw) return true;
+   const txt=((f.事業所名||'')+(f.住所||'')+(f.メッセージ||'')+(f.統合タグ||'')).toLowerCase();
+   return txt.includes(kw);
+ });
+ document.getElementById('count').textContent=filtered.length+'件 / 全'+data.length+'件';
+ document.getElementById('results').innerHTML=filtered.map(f=>`
+  <div class="card"><b>No.${f.No} ${f.事業所名}</b> <span style="font-size:11px;background:#eee;padding:2px 6px;border-radius:8px">${f.区}</span>
+  <div style="font-size:12px;color:#666">${f.住所||''} / ${f.電話番号||''}</div>
+  <div>${(f.統合タグ||'').split(',').map(t=>`<span class="tag">${t.trim()}</span>`).join('')}</div>
+  <div style="font-size:13px;margin-top:4px">${f.メッセージ||''}</div></div>`).join('');
+}
+document.getElementById('q').addEventListener('input',render);
+</script>
+</body>
+</html>
